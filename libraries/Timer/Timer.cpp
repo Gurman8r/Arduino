@@ -4,7 +4,7 @@
 * * * * * * * * * * * * * * * */
 #include <Timer.h>
 
-#if ARDUINO >= 100
+#if defined(ARDUINO)
 	#include <Arduino.h>
 	#define DELTA_TIME millis
 #endif

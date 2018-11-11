@@ -1,6 +1,10 @@
 /* EspMod.h
 *	Author: 	Melody Gurman
 * 	Modified: 	11/11/2018
+*
+*	Based on Adafruit_ESP8266 library
+*	https://github.com/adafruit/Adafruit_ESP8266
+*
 * * * * * * * * * * * * * * * */
 #ifndef _ESP_MOD_H_
 #define _ESP_MOD_H_
