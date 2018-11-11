@@ -1,3 +1,7 @@
+/* InputState.h
+*	Author: 	Melody Gurman
+* 	Modified: 	11/11/2018
+* * * * * * * * * * * * * * * */
 #ifndef _INPUT_STATE_H_
 #define _INPUT_STATE_H_
 

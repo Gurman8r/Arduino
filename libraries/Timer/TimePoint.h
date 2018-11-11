@@ -1,3 +1,7 @@
+/* TimePoint.h
+*	Author: 	Melody Gurman
+* 	Modified: 	11/11/2018
+* * * * * * * * * * * * * * * */
 #ifndef _TIME_POINT_H_
 #define _TIME_POINT_H_
 

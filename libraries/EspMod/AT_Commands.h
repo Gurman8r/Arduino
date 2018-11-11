@@ -1,3 +1,7 @@
+/* AT_Commands.h
+*	Author: 	Melody Gurman
+* 	Modified: 	11/11/2018
+* * * * * * * * * * * * * * * */
 #ifndef _AT_COMMANDS_H_
 #define _AT_COMMANDS_H_
 

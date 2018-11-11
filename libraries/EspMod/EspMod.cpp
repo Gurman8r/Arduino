@@ -1,3 +1,7 @@
+/* EspMod.cpp
+*	Author: 	Melody Gurman
+* 	Modified: 	11/11/2018
+* * * * * * * * * * * * * * * */
 #include <EspMod.h>
 #include <stdarg.h>
 #include <avr/pgmspace.h>

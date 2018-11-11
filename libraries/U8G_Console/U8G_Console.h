@@ -1,3 +1,7 @@
+/* U8G_Console.h
+*	Author: 	Melody Gurman
+* 	Modified: 	11/11/2018
+* * * * * * * * * * * * * * * */
 #ifndef _U8G_CONSOLE_H_
 #define _U8G_CONSOLE_H_
 

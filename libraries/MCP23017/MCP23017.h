@@ -1,3 +1,7 @@
+/* MCP23017.h
+*	Author: 	Melody Gurman
+* 	Modified: 	11/11/2018
+* * * * * * * * * * * * * * * */
 #ifndef _MCP23017_H_
 #define _MCP23017_H_
 

@@ -1,4 +1,7 @@
-/* * * * * * * * * * * * * * * * * * * * * */
+/* U8G_Console.cpp
+*	Author: 	Melody Gurman
+* 	Modified: 	11/11/2018
+* * * * * * * * * * * * * * * */
 
 #include <U8G_Console.h>
 #include <stdarg.h>

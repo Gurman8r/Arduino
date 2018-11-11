@@ -1,5 +1,9 @@
-#ifndef _SEG_ALPHA_H_
-#define _SEG_ALPHA_H_
+/* SegmentConfig.h
+*	Author: 	Melody Gurman
+* 	Modified: 	11/11/2018
+* * * * * * * * * * * * * * * */
+#ifndef _SEGMENT_CONFIG_H_
+#define _SEGMENT_CONFIG_H_
 
 enum Digit : unsigned
 {

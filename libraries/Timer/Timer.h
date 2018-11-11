@@ -1,5 +1,7 @@
-/*
-*/
+/* Timer.h
+*	Author: 	Melody Gurman
+* 	Modified: 	11/11/2018
+* * * * * * * * * * * * * * * */
 #ifndef _TIMER_H_
 #define _TIMER_H_
 

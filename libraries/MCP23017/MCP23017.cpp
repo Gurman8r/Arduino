@@ -1,4 +1,7 @@
-// * * * * * * * * * * * * * * * * //
+/* MCP23017.h
+*	Author: 	Melody Gurman
+* 	Modified: 	11/11/2018
+* * * * * * * * * * * * * * * */
 
 #include <MCP23017.h>
 

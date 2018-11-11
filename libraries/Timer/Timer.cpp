@@ -1,3 +1,7 @@
+/* Timer.cpp
+*	Author: 	Melody Gurman
+* 	Modified: 	11/11/2018
+* * * * * * * * * * * * * * * */
 #include <Timer.h>
 
 #if ARDUINO >= 100
