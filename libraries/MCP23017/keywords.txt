@@ -1,0 +1,45 @@
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+getReg8		KEYWORD2
+setReg8		KEYWORD2
+getReg16	KEYWORD2
+setReg16	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+MCP23017	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+IODIRA		LITERAL1
+IODIRB		LITERAL1
+IPOLA		LITERAL1
+IPOLB		LITERAL1
+GPINTENA	LITERAL1
+GPINTENB	LITERAL1
+DEFVALA		LITERAL1
+DEFVALB		LITERAL1
+INTCONA		LITERAL1
+INTCONB		LITERAL1
+IOCONA		LITERAL1
+IOCONB		LITERAL1
+GPPUA		LITERAL1
+GPPUB		LITERAL1
+INTFA		LITERAL1
+INTFB		LITERAL1
+INTCAPA		LITERAL1
+INTCAPB		LITERAL1
+GPIOA		LITERAL1
+GPIOB		LITERAL1
+OLATA		LITERAL1
+OLATB		LITERAL1

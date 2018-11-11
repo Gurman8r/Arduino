@@ -1,0 +1,46 @@
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Math2D	KEYWORD1	
+Matrix 	KEYWORD1
+Vector 	KEYWORD1
+Vector2 KEYWORD1
+
+vec2	KEYWORD1
+vec2f	KEYWORD1
+vec2i	KEYWORD1
+vec2d	KEYWORD1
+vec2u	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+angle 			KEYWORD2
+magnitude 		KEYWORD2
+sqrMagnitude 	KEYWORD2
+normalize 		KEYWORD2
+normalized 		KEYWORD2
+distance		KEYWORD2
+direction		KEYWORD2
+dot				KEYWORD2
+det				KEYWORD2
+lengthDir		KEYWORD2
+lerp			KEYWORD2
+reflect			KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+Zero	LITERAL1
+One		LITERAL1
+Up		LITERAL1
+Down	LITERAL1
+Left	LITERAL1
+Right	LITERAL1
