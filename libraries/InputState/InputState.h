@@ -18,11 +18,11 @@ public:
 	
 	InputState & begin();
 	InputState & end();
-	InputState & set(uint8_t id, uint8_t phys, uint8_t pud = 0);
+	InputState & set(uint8_t id, uint8_t pin, uint8_t pud);
 	
-	bool getPin(uint8_t pin) const;
-	bool getPinDown(uint8_t pin) const;
-	bool getPinUp(uint8_t pin) const;
+	bool getButton(uint8_t pin) const;
+	bool getButtonDown(uint8_t pin) const;
+	bool getButtonUp(uint8_t pin) const;
 
 private:
 	uint8_t	*m_new; // New State

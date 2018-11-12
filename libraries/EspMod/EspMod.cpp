@@ -1,12 +1,11 @@
-/* EspMod.cpp
+/* 	EspMod.cpp
 *	Author: 	Melody Gurman
 * 	Modified: 	11/11/2018
 * * * * * * * * * * * * * * * */
 #include <EspMod.h>
-#include <stdarg.h>
+#include <HardwareSerial.h>
+#include <SoftwareSerial.h>
 #include <avr/pgmspace.h>
-
-#define RX_BUFFER_SIZE 64
 
 EspMod::EspMod()
 	: m_stream(NULL)
@@ -33,6 +32,25 @@ EspMod::~EspMod()
 {
 }
 
+
+bool	EspMod::begin(uint64_t baud)
+{
+	HardwareSerial* hs;
+	if(stream() && (hs = static_cast<HardwareSerial*>(stream())))
+	{
+		hs->begin(baud);
+		return true;
+	}
+	
+	SoftwareSerial* ss;
+	if(stream() && (ss = static_cast<SoftwareSerial*>(stream())))
+	{
+		ss->begin(baud);
+		return true;
+	}
+	
+	return false;
+}
 
 bool 	EspMod::connect(Fstr* ssid, Fstr* pass)
 {
@@ -68,7 +86,6 @@ bool 	EspMod::find(Fstr* str)
 	str = str ? str : F("OK");
 
 	uint8_t  	matchedLength = 0;
-	uint16_t 	bytesToGo = 0;
 	uint8_t 	stringLength = strlen_P((Pchr *)str);
 
 	for (uint32_t t = millis();;)
@@ -76,15 +93,12 @@ bool 	EspMod::find(Fstr* str)
 		int c;
 		if ((c = stream()->read()) > 0)
 		{
-			if (m_debug){
-				m_debug->write(c);
-			}
-
-			bytesToGo--;
+			if (m_debug) { m_debug->write(c); }
 
 			if (c == pgm_read_byte((Pchr*)str + matchedLength))
 			{
-				if (++matchedLength == stringLength) {
+				if (++matchedLength == stringLength) 
+{
 					return true;
 				}
 			}
@@ -97,66 +111,14 @@ bool 	EspMod::find(Fstr* str)
 		}
 		else if (c < 0)
 		{
-			if ((millis() - t) > ESP_RX_TIMEOUT) {
+			if ((millis() - t) > ESP_RX_TIMEOUT)
+			{
 				return false; // Timeout
 			}
 		}
 
 	}
 	return false; // Not found
-}
-
-int		EspMod::findIpd()
-{
-	int bytesRead = 0;
-
-	int c;		
-	if (find(F(AT_IPD ","))) // Expecting next IPD marker?
-	{ 
-		for (uint32_t t = millis();;)
-		{
-			if ((c = stream()->read()) > 0)
-			{ 
-				if (m_debug) {
-					m_debug->write(c); // Read subsequent chars...
-				}
-				
-				if (c == ':') {
-					break; // ...until delimiter.
-				}
-				
-				bytesRead = (bytesRead * 10) + (c - '0'); // Keep count
-				
-				t = millis(); // Timeout resets w/each byte received
-			}
-			else if (c < 0)
-			{ 
-				// No data on stream, check for timeout
-				if ((millis() - t) > ESP_RX_TIMEOUT)
-				{
-					if(m_debug) {
-						m_debug->println(F("\nConnection timeout"));
-					}
-					return bytesRead;
-				}
-			}
-			else
-			{
-				if(m_debug) {
-					m_debug->println(F("\nNo data on stream"));
-				}
-				return bytesRead;
-			}
-		}
-	}
-	else 
-	{
-		if(m_debug) {
-			m_debug->println(F("\nError"));
-		}
-		return bytesRead;
-	}
-	return bytesRead;
 }
 
 bool	EspMod::hardReset(uint16_t duration)
@@ -175,10 +137,7 @@ int32_t	EspMod::read(char* buf, uint32_t bufSize, char delim)
 
 	buf[bytesRead] = 0;
 
-	if (m_debug)
-	{
-		m_debug->println(buf);
-	}
+	if (m_debug) { m_debug->println(buf); }
 
 	while (stream()->read() != '\n'); // Discard thru newline
 
@@ -193,9 +152,7 @@ bool	EspMod::softReset()
 
 size_t 	EspMod::write(uint8_t c)
 {
-	if (m_debug)
-	{
-		m_debug->write(c);
-	}
+	if (m_debug) { m_debug->write(c); }
+	
 	return stream()->write(c);
 }

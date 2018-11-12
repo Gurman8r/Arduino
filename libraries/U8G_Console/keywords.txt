@@ -3,10 +3,22 @@
 #######################################
 
 U8G_Console		KEYWORD1
+Font			KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
+
+append 			KEYWORD2
+clear			KEYWORD2
+draw			KEYWORD2
+endLine			KEYWORD2
+init			KEYWORD2
+reset			KEYWORD2
+scrollUp		KEYWORD2
+update			KEYWORD2
+rows			KEYWORD2
+cols			KEYWORD2
 
 #######################################
 # Instances (KEYWORD2)

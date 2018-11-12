@@ -8,6 +8,16 @@ EspMod	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
+connect				KEYWORD2
+connectServer		KEYWORD2
+disconnectServer	KEYWORD2
+find				KEYWORD2
+hardReset			KEYWORD2
+read				KEYWORD2
+softReset			KEYWORD2
+write				KEYWORD2
+stream				KEYWORD2
+
 #######################################
 # Instances (KEYWORD2)
 #######################################
