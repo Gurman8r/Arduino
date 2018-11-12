@@ -174,7 +174,7 @@ void setup()
   if (wifi.begin(ESP_BAUD_RATE)) {
     wifi.stream()->setTimeout(ESP_RX_TIMEOUT);
   } else {
-    hang(F("Serial Error"));
+    hang(F("WiFi Stream Setup Failed"));
   }
 
   // Try to Hard Reset
@@ -182,7 +182,7 @@ void setup()
   if (wifi.hardReset()) {
     cout << F("\nReady\n");
   } else {
-    hang(F("\nNo response from module"));
+    hang(F("No response from module"));
   }
 
   // Try to Soft Reset
@@ -190,7 +190,7 @@ void setup()
   if (wifi.softReset()) {
     cout << F("\nReady\n");
   } else {
-    hang(F("\nNo response from module"));
+    hang(F("No response from module"));
   }
 
   // Try to Connect to Network
@@ -199,7 +199,7 @@ void setup()
     if (connectWiFi(F(_SSID), F(_PASS), _TRIES)) {
       cout << F("\nConnection Success\n");
     } else {
-      hang(F("\nConnection Failure"));
+      hang(F("Connection Failure"));
     }
   } else {
     cout << F("\nAlready Connected\n");
