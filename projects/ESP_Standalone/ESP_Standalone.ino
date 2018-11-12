@@ -1,5 +1,33 @@
 // * * * * * * * * * * * * * * * * //
 
+/*  Author: Melody Gurman
+    Date:   11/11/2018
+    Desc:   Driver for my standalone Atmega328p board.
+            Posts PHP data to server.
+            I used NGINX and mySQL running on my Raspberry Pi to get this working.
+            
+    Using Modules:
+      - Tiny RTC I2C (DS1307)
+      - ESP8266-01
+      - SSD1306 128x64 OLED
+*/
+
+// * * * * * * * * * * * * * * * * //
+
+/* 
+  File: "dateTime.php"
+  Desc: Auto generates "dateTime.html" with posted data
+  
+<?php
+  $Date=$_POST["date"];
+  $Time=$_POST["time"];
+  $Write= "<p>Date : ".$Date."</p>"."<p>Time : ".$Time." </p>";
+  file_put_contents("dateTime.html",$Write);
+?>
+*/
+
+// * * * * * * * * * * * * * * * * //
+
 #include <RTClib.h>
 #include <U8G_Console.h>
 #include <EspMod.h>
@@ -21,18 +49,17 @@
 
 // * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * //
-
 U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_DEV_0 | U8G_I2C_OPT_NO_ACK | U8G_I2C_OPT_FAST);
 U8G_Console cout;
 EspMod      wifi(&Serial, &cout, _RESET);
-RTC_DS1307  rtc;
+RTC_DS1307  RTC;
 Timer       timer;
 InputState  input;
-String      data;
+String      phpData;
 
 // * * * * * * * * * * * * * * * * //
 
+// Blink pin, 'pin', 'count' times for 'msec' milliseconds
 void blink(byte pin, unsigned msec, unsigned count) {
   const unsigned time = ((msec > 1) ? (msec / 2) : (1));
   while (count--) {
@@ -43,15 +70,17 @@ void blink(byte pin, unsigned msec, unsigned count) {
   }
 }
 
-void hang(const __FlashStringHelper* msg = NULL) {
+// Something terrible has happened!
+void hang(const Fstr* msg = NULL) {
   cout << F("\n--Error--\n");
   if (msg) {
     cout << msg << ENDL;
   }
-  cout << F("\nPlease reset device.\n");
+  cout << F("Please reset device.\n");
   while (true);
 }
 
+// Try to connect to WiFi 'maxTries' times before failing
 bool connectWiFi(Fstr* ssid, Fstr* pass, uint8_t maxTries) {
   for (uint8_t i = 0; i < maxTries; i++) {
     cout << F("Attempt (") << (i + 1) << '/' << maxTries << F(")\n");
@@ -62,81 +91,109 @@ bool connectWiFi(Fstr* ssid, Fstr* pass, uint8_t maxTries) {
   return false;
 }
 
-void updateData()
-{
-  const DateTime& now = rtc.now();
-  uint16_t  y  = now.year();
-  uint8_t   m   = now.month();
-  uint8_t   d   = now.day();
-  uint8_t   hh  = now.hour();
-  uint8_t   mm  = now.minute();
-  uint8_t   ss  = now.second();
-  uint8_t   pm  = (hh > 12);
-  
-  hh = (pm) ? (hh - 12) : (hh); // 12 hour format
+// Format DateTime "DD/MM/YY"
+String getDateStr(const DateTime & now) {
+  static char     buf[16];
+  const uint16_t  yr = now.year();
+  const uint8_t   mn = now.month();
+  const uint8_t   dy = now.day();
+  snprintf(buf, sizeof(buf), "%u/%u/%u",
+           dy,
+           mn,
+           yr);
+  return buf;
+}
 
-  char dateStr[16];
-  snprintf(dateStr, sizeof(dateStr), "%u/%u/%u", d, m, y);
+// Format DateTime "HH:MM:SS A/PM"
+String getTimeStr(const DateTime & now) {
+  static char     buf[16];
+  const uint8_t   hh = now.hour();
+  const uint8_t   mm = now.minute();
+  const uint8_t   ss = now.second();
+  const uint8_t   pm = (hh > 12);
+  snprintf(buf, sizeof(buf), "%u:%u%u:%u%u %cM",
+           (pm ? (hh - 12) : hh),
+           (mm / 10 % 10),
+           (mm % 10),
+           (ss / 10 % 10),
+           (ss % 10),
+           (pm ? 'P' : 'A'));
+  return buf;
+}
 
-  char timeStr[16];
-  snprintf(timeStr, sizeof(timeStr), "%c%u:%c%u:%c%u %s",
-           hh, (mm < 10 ? '0' : 0), mm, (ss < 10 ? '0' : 0), ss, (pm ? "PM" : "AM"));
+String & updatePhpData(String & value) {
+  const DateTime & now = RTC.now();
+  return (value =
+            "date=" + getDateStr(now) +
+            '&' +
+            "time=" + getTimeStr(now));
+}
 
-  data = "";
-  data += ("date=") + String(dateStr);
-  data += ("&");
-  data += ("time=") + String(timeStr);
+String getPostRequest(const String & host, const String & page, const String & data) {
+  return String(
+           "POST " + page + " HTTP/1.0" +
+           "\r\n" + "Host: " + host +
+           "\r\n" + "Accept: */*" +
+           "\r\n" + "Content-Length: " + data.length() +
+           "\r\n" + "Content-Type: application/x-www-form-urlencoded" +
+           "\r\n" +
+           "\r\n" + data);
 }
 
 // * * * * * * * * * * * * * * * * //
 
-void setup() {
+void setup()
+{
+  // Initialize Builtin LED
   pinMode(LED_BUILTIN, OUTPUT);
   blink(LED_BUILTIN, 100, 3);
 
-  // Set Inputs
+  // Initialize InputState
   input.init(2);
   input.set(0, 10, INPUT_PULLUP);
   input.set(1,  9, INPUT_PULLUP);
 
-  // Init U8G Console
+  // Initialize U8G_Console
   cout.init(&u8g, u8g_font_5x7).clear();
-  cout << F("Hello, World!\n")
-       << F("U8G Console\n")
-       << F("Melody Gurman - 2018\n\n");
+  cout << F("-- U8G_Console\n")
+       << F("-- Melody Gurman\n")
+       << F("-- 2018\n")
+       << F("\n\nHello, World!\n");
 
-  // Update RTC
-  input.begin();
-  if (!rtc.isrunning() || input.getPin(0)) {
-    rtc.adjust(DateTime(__DATE__, __TIME__));
-    const DateTime& now = rtc.now();
-    cout  << F("\nUpdate Clock\n")
-          << now.day()  << '/' << now.month()  << '/' << now.year() << ENDL
-          << now.hour() << ':' << now.minute() << ':' << now.second() << ENDL;
-    delay(1000);
+  // Initialize RTC_DS1307
+  if (!RTC.isrunning() || input.begin().getButtonDown(0)) {
+    RTC.adjust(DateTime(__DATE__, __TIME__));
+    cout << F("\nUpdated RTC\n");
+  }
+  const DateTime & now = RTC.now();
+  cout << F("\nDate: ") << getDateStr(now)
+       << F("\nTime: ") << getTimeStr(now) << ENDL;
+  delay(1000);
+
+  // Initialize WiFi
+  if (wifi.begin(ESP_BAUD_RATE)) {
+    wifi.stream()->setTimeout(ESP_RX_TIMEOUT);
+  } else {
+    hang(F("Serial Error"));
   }
 
-  // Setup Serial
-  Serial.begin(ESP_BAUD_RATE);
-  Serial.setTimeout(ESP_RX_TIMEOUT);
-
-  // Hard Reset
-  cout << F("\nHard Reset...\n");
+  // Try to Hard Reset
+  cout << F("\nTrying Hard Reset...\n");
   if (wifi.hardReset()) {
     cout << F("\nReady\n");
   } else {
     hang(F("\nNo response from module"));
   }
 
-  // Soft Reset
-  cout << F("\nSoft Reset...\n");
+  // Try to Soft Reset
+  cout << F("\nTrying Soft Reset...\n");
   if (wifi.softReset()) {
     cout << F("\nReady\n");
   } else {
     hang(F("\nNo response from module"));
   }
 
-  // Connect to network
+  // Try to Connect to Network
   if (!wifi.find(F("WIFI CONNECTED"))) {
     cout << F("\nConnecting...\n");
     if (connectWiFi(F(_SSID), F(_PASS), _TRIES)) {
@@ -148,54 +205,62 @@ void setup() {
     cout << F("\nAlready Connected\n");
   }
 
-  // Wait for network auth to finish
+  // Wait for IP Address
   cout << F("\nObtaining IP Address...\n");
   wifi.find(F("GOT IP"));
   wifi.find();
 }
 
 void loop() {
+  blink(LED_BUILTIN, 100, 1);
+
+  // Clear Display
   cout.clear();
-  blink(LED_BUILTIN, 100, 3);
-  updateData();
 
-  cout << F("\nConnecting ") << _MODE << F("...\n");
-  if (wifi.connectServer(F(_MODE), F(_HOST), F(_PORT)))
-  {
-    cout << F("\nConnection Success\n") << ENDL;
+  // Update Data
+  updatePhpData(phpData);
 
-    String postRequest =
-      "POST " + String(_PAGE) + " HTTP/1.0\r\n" +
-      "Host: " + String(_HOST) + "\r\n" +
-      "Accept: */*\r\n" +
-      "Content-Length: " + data.length() + "\r\n" +
-      "Content-Type: application/x-www-form-urlencoded\r\n" +
-      "\r\n" + data;
+  // Connect to server
+  cout << F("\nStart " _MODE " Connection...\n");
+  if (wifi.connectServer(F(_MODE), F(_HOST), F(_PORT))) {
+    cout << F("\nConnection Success\n");
+    blink(LED_BUILTIN, 100, 1);
 
+    // Send Post Request
+    String request = getPostRequest(_HOST, _PAGE, phpData);
     wifi.print(F(AT_CIPSEND "="));
-    wifi.println(postRequest.length());
-    delay(500);
-    if (wifi.find(F(">")))
-    {
-      cout << F(">\nSending...\n");
-      wifi.print(postRequest);
-      if (wifi.find(F("SEND OK")))
-      {
-        cout << F("\nSend Success\n");
+    wifi.println(request.length());
 
-        while (Serial.available()) {
-          cout << Serial.readString();
+    delay(500);
+
+    // Wait for ready ">>"
+    if (wifi.find(F(">"))) {
+      cout << '>';
+      blink(LED_BUILTIN, 100, 1);
+
+      // Send post to server
+      cout << F("\nPosting...\n");
+      wifi.print(request);
+
+      // Wait for send ok
+      if (wifi.find(F("SEND OK"))) {
+        cout << F("\nPost Success\n");
+        blink(LED_BUILTIN, 100, 1);
+
+        // Read out callbacks
+        while (wifi.stream()->available()) {
+          cout << wifi.stream()->readString();
+          blink(LED_BUILTIN, 50, 1);
         }
-      }
-      else
-      {
-        cout << F("\nSend Failure\n");
+
+        cout << F("\nDone.\n");
+
+      } else {
+        cout << F("\nPost Failure\n");
       }
     }
-  }
-  else
-  {
-    cout << F("\nConnection Failure\n") << ENDL;
+  } else {
+    cout << F("\nConnection Failure\n");
   }
 
   delay(1000);
