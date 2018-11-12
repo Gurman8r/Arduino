@@ -121,6 +121,7 @@ String getTimeStr(const DateTime & now) {
   return buf;
 }
 
+// Update PHP Data String
 String & updatePhpData(String & value) {
   const DateTime & now = RTC.now();
   return (value =
@@ -129,6 +130,7 @@ String & updatePhpData(String & value) {
             "time=" + getTimeStr(now));
 }
 
+// Generate Post Request
 String getPostRequest(const String & host, const String & page, const String & data) {
   return String(
            "POST " + page + " HTTP/1.0" +
